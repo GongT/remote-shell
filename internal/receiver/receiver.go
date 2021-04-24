@@ -32,17 +32,20 @@ func msgHandler(src *net.UDPAddr, n int, b []byte) {
 	message, err := actions.Unmarshal(b)
 	if err != nil {
 		log.Println("failed to unmarshal:", err)
-	}
-
-	err = broadcaster.Action(handlers.NewCallbackAction(message.GetId()))
-	if err != nil {
-		log.Println("send callback failed:", err)
 		return
 	}
 
 	err = message.Handle()
 	if err != nil {
 		log.Println("run action handler failed:", err)
+		return
+	}
+	log.Println("run action handler complete. will response.")
+
+	err = broadcaster.Action(handlers.NewCallbackAction(message.GetId()))
+	if err != nil {
+		log.Println("send callback failed:", err)
+		return
 	}
 }
 

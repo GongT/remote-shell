@@ -1,38 +1,47 @@
 package handlers
 
 import (
-	"github.com/gongt/remote-shell/internal/actions/action-base"
-	"strings"
-	"os/exec"
 	"log"
 	"net/url"
 	"os"
-	"fmt"
+	"os/exec"
+
+	action_base "github.com/gongt/remote-shell/internal/actions/action-base"
+	"github.com/gongt/remote-shell/internal/helpers"
 )
 
 type OpenAction struct {
 	action_base.MessageBase
+	Root string
 	Path string
 }
 
-func NewOpenAction(file string) action_base.Message {
+func NewOpenAction(root, file string) action_base.Message {
 	return &OpenAction{
 		action_base.MessageBase{
 			TypeId: action_base.TypeOpen,
 			Id:     action_base.InvalidMessage,
 		},
+		root,
 		file,
 	}
 }
 
 func (act *OpenAction) Handle() (err error) {
-	lpPath := strings.Replace(act.Path, "/", "\\", -1)
-	lpPath, err = url.PathUnescape(lpPath)
+	letter := helpers.FindDriveById(act.Root)
+	log.Printf("get samba drive: %s:", letter)
+	if letter == "" {
+		log.Println("ignore not exists:", act.Root)
+		return
+	}
+	lpPath, err := url.PathUnescape(act.Path)
 	if err != nil {
 		return err
 	}
+	lpPath = letter + ":/" + lpPath
 
-	cmd := exec.Command("powershell", "-Command", "Start-Process", fmt.Sprintf("\"%s\"", lpPath))
+	cmd := exec.Command("rundll32.exe", "url.dll,FileProtocolHandler", lpPath)
+	// cmd := exec.Command("powershell", "-windowstyle", "hidden", "-Command", "Start-Process", fmt.Sprintf("\"%s\"", lpPath))
 
 	log.Println("run command: ", cmd.Args)
 

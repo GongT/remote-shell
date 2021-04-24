@@ -1,17 +1,18 @@
 package main
 
 import (
-	"github.com/gongt/remote-shell/internal/broadcaster"
-	"github.com/gongt/remote-shell/internal/actions/handlers"
-	"os"
 	"log"
-	"github.com/gongt/remote-shell/internal/receiver"
+	"os"
 	"strings"
-	"github.com/gongt/remote-shell/internal/constants"
+
+	"github.com/gongt/remote-shell/internal/actions/handlers"
+	"github.com/gongt/remote-shell/internal/broadcaster"
+	"github.com/gongt/remote-shell/internal/helpers"
+	"github.com/gongt/remote-shell/internal/receiver"
 )
 
 func main() {
-	log.Println("hello, client.")
+	log.Println("hello, client.", os.Args)
 
 	if len(os.Args) == 1 {
 		log.Println("Error: no arguments.")
@@ -28,11 +29,16 @@ func main() {
 		if i == 0 {
 			continue
 		}
-		if strings.HasPrefix(f, constants.FileOpenLocalPrefix) || strings.HasPrefix(f, "file://"+constants.FileOpenLocalPrefix) {
-			f = strings.Replace(f, constants.FileOpenLocalPrefix, constants.FileOpenBase, 1)
-			f = strings.Replace(f, "file://", "", 1)
-			log.Println("open file:", f)
-			succ = succ || open(f)
+		if strings.HasPrefix(f, "file:///") {
+			f = f[7:]
+		}
+		if strings.HasPrefix(f, "/") {
+			rootId, relFile, err := helpers.FindRoot(f)
+			if err != nil {
+				log.Printf("can not open %s: %v", f, err)
+			}
+			log.Println("open file:", rootId, relFile)
+			succ = succ || open(rootId, relFile)
 		} else if strings.HasPrefix(f, "http://") || strings.HasPrefix(f, "https://") {
 			log.Println("open browser:", f)
 			succ = succ || url(f)
@@ -49,10 +55,10 @@ func main() {
 	}
 }
 
-func open(f string) bool {
-	err := broadcaster.Action(handlers.NewOpenAction(f))
+func open(root, f string) bool {
+	err := broadcaster.Action(handlers.NewOpenAction(root, f))
 	if err != nil {
-		log.Println("Error open file:", err)
+		log.Println("error open file:", err)
 		return false
 	}
 	return true
