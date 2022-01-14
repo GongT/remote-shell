@@ -1,25 +1,26 @@
 package receiver
 
 import (
+	"bytes"
+	"log"
 	"net"
+
 	"github.com/dmichael/go-multicast/multicast"
 	"github.com/gongt/remote-shell/internal/actions"
-	"github.com/gongt/remote-shell/internal/constants"
-	"log"
-	"github.com/gongt/remote-shell/internal/broadcaster"
 	"github.com/gongt/remote-shell/internal/actions/handlers"
-	"bytes"
+	"github.com/gongt/remote-shell/internal/broadcaster"
+	"github.com/gongt/remote-shell/internal/constants"
 )
 
 func StartListener() {
-	address := constants.MulticastAddress
+	address := constants.BoardcastListenAddress
 	log.Printf("Listening on %s\n", address)
 
 	multicast.Listen(address, msgHandler)
 }
 
 func StartCallbackListener() {
-	address := constants.MulticastAddress
+	address := constants.BoardcastListenAddress
 	log.Printf("Listening (only callback) on %s\n", address)
 
 	multicast.Listen(address, cbHandler)
