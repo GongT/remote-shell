@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	"github.com/gongt/remote-shell/internal/actions/handlers"
-	"github.com/gongt/remote-shell/internal/broadcaster"
 	"github.com/gongt/remote-shell/internal/helpers"
-	"github.com/gongt/remote-shell/internal/receiver"
+	"github.com/gongt/remote-shell/internal/networking"
 )
 
 func main() {
@@ -19,9 +18,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	broadcaster.Init()
-
-	go receiver.StartCallbackListener()
+	networking.CreateClient()
 
 	succ := false
 
@@ -56,16 +53,16 @@ func main() {
 }
 
 func open(root, f string) bool {
-	err := broadcaster.Action(handlers.NewOpenAction(root, f))
+	err := networking.Action(handlers.NewOpenAction(root, f))
 	if err != nil {
-		log.Println("error open file:", err)
+		log.Println("Error open file:", err)
 		return false
 	}
 	return true
 }
 
 func url(f string) bool {
-	err := broadcaster.Action(handlers.NewUrlAction(f))
+	err := networking.Action(handlers.NewUrlAction(f))
 	if err != nil {
 		log.Println("Error open browser:", err)
 		return false
@@ -74,7 +71,7 @@ func url(f string) bool {
 }
 
 func magnet(f string) bool {
-	err := broadcaster.Action(handlers.NewMagnetAction(f))
+	err := networking.Action(handlers.NewMagnetAction(f))
 	if err != nil {
 		log.Println("Error open magnet:", err)
 		return false

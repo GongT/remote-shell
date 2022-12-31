@@ -27,7 +27,7 @@ func NewOpenAction(root, file string) action_base.Message {
 	}
 }
 
-func (act *OpenAction) Handle() (err error) {
+func (act *OpenAction) Handle() (reply bool, err error) {
 	letter := helpers.FindDriveById(act.Root)
 	log.Printf("get samba drive: %s:", letter)
 	if letter == "" {
@@ -36,7 +36,7 @@ func (act *OpenAction) Handle() (err error) {
 	}
 	lpPath, err := url.PathUnescape(act.Path)
 	if err != nil {
-		return err
+		return true, err
 	}
 	lpPath = letter + ":/" + lpPath
 
@@ -51,5 +51,5 @@ func (act *OpenAction) Handle() (err error) {
 	if err := cmd.Run(); err != nil {
 		log.Println("Error:", err)
 	}
-	return nil
+	return true, nil
 }

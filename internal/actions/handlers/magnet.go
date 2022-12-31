@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"github.com/gongt/remote-shell/internal/actions/action-base"
-	"os/exec"
 	"log"
 	"net/url"
+	"os/exec"
+
+	action_base "github.com/gongt/remote-shell/internal/actions/action-base"
 )
 
 type MagnetAction struct {
@@ -22,11 +23,11 @@ func NewMagnetAction(magnet string) action_base.Message {
 	}
 }
 
-func (act *MagnetAction) Handle() (err error) {
+func (act *MagnetAction) Handle() (reply bool, err error) {
 	p := act.Magnet
 	p, err = url.PathUnescape(p)
 	if err != nil {
-		return err
+		return true, err
 	}
 
 	cmd := exec.Command("qbittorrent", p)
@@ -36,5 +37,5 @@ func (act *MagnetAction) Handle() (err error) {
 	if err := cmd.Run(); err != nil {
 		log.Println("Error:", err)
 	}
-	return nil
+	return true, nil
 }

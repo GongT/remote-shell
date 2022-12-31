@@ -1,7 +1,7 @@
 package action_base
 
 type Message interface {
-	Handle() error
+	Handle() (bool, error)
 	GetTypeId() uint32
 	GetId() uint32
 	SetId(uint32)

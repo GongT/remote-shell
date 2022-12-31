@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"github.com/getlantern/systray"
 	"os"
+
+	"github.com/getlantern/systray"
 	"github.com/gongt/remote-shell/internal/icon"
-	"github.com/gongt/remote-shell/internal/broadcaster"
+	"github.com/gongt/remote-shell/internal/networking"
 	"github.com/gongt/remote-shell/internal/receiver"
 )
 
@@ -19,7 +21,7 @@ func onReady() {
 	systray.SetIcon(icon.IconData)
 	systray.SetTitle("Remote Shell")
 	mQuit := systray.AddMenuItem("Quit", "Quit the app")
-	go startup()
+	startup()
 	<-mQuit.ClickedCh
 	onExit()
 	os.Exit(0)
@@ -30,6 +32,11 @@ func onExit() {
 }
 
 func startup() {
-	broadcaster.Init()
-	receiver.StartListener()
+	s, err := networking.CreateServer(receiver.MessageHandler)
+
+	if err != nil {
+		panic(fmt.Errorf("Can not create server: %w", err))
+	}
+
+	go s.Start()
 }

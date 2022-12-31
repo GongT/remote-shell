@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"github.com/gongt/remote-shell/internal/timeout-controller"
-	"github.com/gongt/remote-shell/internal/actions/action-base"
+	action_base "github.com/gongt/remote-shell/internal/actions/action-base"
+	timeout_controller "github.com/gongt/remote-shell/internal/timeout-controller"
 )
 
 type CallbackAction struct {
@@ -18,7 +18,7 @@ func NewCallbackAction(id uint32) action_base.Message {
 	}
 }
 
-func (act *CallbackAction) Handle() error {
+func (act *CallbackAction) Handle() (bool, error) {
 	timeout_controller.Cancel(act.Id)
-	return nil
+	return false, nil
 }

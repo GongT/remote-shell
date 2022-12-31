@@ -1,11 +1,12 @@
 package handlers
 
 import (
-	"github.com/gongt/remote-shell/internal/actions/action-base"
-	"strings"
-	"os/exec"
 	"log"
 	"net/url"
+	"os/exec"
+	"strings"
+
+	action_base "github.com/gongt/remote-shell/internal/actions/action-base"
 )
 
 type UrlAction struct {
@@ -23,11 +24,11 @@ func NewUrlAction(file string) action_base.Message {
 	}
 }
 
-func (act *UrlAction) Handle() (err error) {
+func (act *UrlAction) Handle() (reply bool, err error) {
 	p := strings.Replace(act.Path, "/", "\\", -1)
 	p, err = url.PathUnescape(p)
 	if err != nil {
-		return err
+		return true, err
 	}
 
 	cmd := exec.Command("powershell", "-Command", "Start-Process", p)
@@ -37,5 +38,5 @@ func (act *UrlAction) Handle() (err error) {
 	if err := cmd.Run(); err != nil {
 		log.Println("Error:", err)
 	}
-	return nil
+	return true, nil
 }
